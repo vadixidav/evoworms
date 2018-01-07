@@ -5,4 +5,3 @@ authors = ["Geordon Worley <vadixidav@gmail.com>"]
 
 [dependencies]
 arrayfire = "3.5.0"
-rand = "0.4.2"
