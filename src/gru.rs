@@ -10,9 +10,9 @@ struct GRUTanh {
 impl GRUTanh {
     fn new_random(inputs: u64, outputs: u64) -> GRUTanh {
         GRUTanh {
-            hidden_matrix: af::randu::<f32>(Dim4::new(&[outputs, outputs, 1, 1])),
-            input_matrix: af::randu::<f32>(Dim4::new(&[outputs, inputs, 1, 1])),
-            biases: af::randu::<f32>(Dim4::new(&[outputs, 1, 1, 1])),
+            hidden_matrix: af::randu::<f32>(Dim4::new(&[outputs, outputs, 1, 1])) * 2 - 1,
+            input_matrix: af::randu::<f32>(Dim4::new(&[outputs, inputs, 1, 1])) * 2 - 1,
+            biases: af::randu::<f32>(Dim4::new(&[outputs, 1, 1, 1])) * 2 - 1,
         }
     }
 
@@ -34,9 +34,9 @@ struct GRUGate {
 impl GRUGate {
     fn new_random(inputs: u64, outputs: u64) -> GRUGate {
         GRUGate {
-            hidden_matrix: af::randu::<f32>(Dim4::new(&[outputs, outputs, 1, 1])),
-            input_matrix: af::randu::<f32>(Dim4::new(&[outputs, inputs, 1, 1])),
-            biases: af::randu::<f32>(Dim4::new(&[outputs, 1, 1, 1])),
+            hidden_matrix: af::randu::<f32>(Dim4::new(&[outputs, outputs, 1, 1])) * 2 - 1,
+            input_matrix: af::randu::<f32>(Dim4::new(&[outputs, inputs, 1, 1])) * 2 - 1,
+            biases: af::randu::<f32>(Dim4::new(&[outputs, 1, 1, 1])) * 2 - 1,
         }
     }
 
@@ -72,8 +72,9 @@ impl GRU {
         // Compute update coefficients.
         let z = self.update_gate.apply(&self.hiddens, inputs);
 
-        let outputs: Array =
-            (&z + -1) * self.output_layer.apply(&(r * &self.hiddens), inputs) + z * &self.hiddens;
+        let outputs: Array = (-z.clone() + 1)
+            * self.output_layer.apply(&(r * &self.hiddens), inputs)
+            + z * &self.hiddens;
 
         self.hiddens = outputs.clone();
         outputs
