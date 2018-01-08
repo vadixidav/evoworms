@@ -25,12 +25,12 @@ mod test {
 
     #[test]
     fn test_wrapping() {
-        let a = wrap_pos(&(af::randu::<f32>(Dim4::new(&[100, 1, 1, 1])) * 5.0 - 2.5));
-        let mut host = [false; 1];
+        let a = wrap_pos(&(af::randu::<f32>(Dim4::new(&[100, 2, 1, 1])) * 5.0 - 2.5));
+        let mut host = [false; 2];
         af::all_true(
             &af::and(&af::ge(&a, &0, false), &af::lt(&a, &1, false), false),
             0,
         ).host(&mut host);
-        assert!(host[0]);
+        assert!(host[0] && host[1]);
     }
 }
