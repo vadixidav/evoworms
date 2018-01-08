@@ -24,7 +24,7 @@ mod test {
     use af::Dim4;
 
     #[test]
-    fn test_wrapping() {
+    fn test_wrap_pos() {
         let a = wrap_pos(&(af::randu::<f32>(Dim4::new(&[100, 2, 1, 1])) * 5.0 - 2.5));
         let mut host = [false; 2];
         af::all_true(
