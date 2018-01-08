@@ -1,6 +1,8 @@
 extern crate arrayfire as af;
 
 mod gru;
+mod snake;
+mod geom;
 
 use af::*;
 
