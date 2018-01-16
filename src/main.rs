@@ -16,11 +16,8 @@ fn main() {
 
     let wnd = Window::new(1280, 720, String::from("GRU Outputs"));
 
-    loop {
+    while !wnd.is_closed() {
         wnd.draw_image(&out, None);
-
-        if wnd.is_closed() == true {
-            break;
-        }
+        ::std::thread::sleep_ms(50);
     }
 }
