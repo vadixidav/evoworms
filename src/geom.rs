@@ -18,6 +18,11 @@ pub fn wrap_delta(deltas: &Array) -> Array {
     af::select(&neg, &af::lt(deltas, &0.0f32, false), &pos)
 }
 
+/// Generates a 2d unit vector pointing in the angle specified.
+pub fn angle_norm(angle: &Array) -> Array {
+    af::join(1, &af::cos(angle), &af::sin(angle))
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
