@@ -40,7 +40,6 @@ impl Worm {
         self.brain.mutate(0.01);
         let choices = self.brain
             .apply(&Array::new(&[0f32; 128], Dim4::new(&[128, 1, 1, 1])));
-        af::print(&choices);
         self.angle = af::row(&choices, 0) * 0.01f32 + &self.angle;
         let delta = &geom::angle_norm(&self.angle) * 0.003f32;
         let next = &af::row(&self.body, 0) + &delta;
