@@ -1,7 +1,9 @@
 use gru::GRU;
-use af::{self, Array, Dim4, Window, Convertable};
+use af::{self, Array, Convertable, Dim4, Window};
 use std::f32::consts::PI;
 use geom;
+use cgmath;
+use itertools::Itertools;
 
 fn get_bool(a: &Array) -> bool {
     let mut host = [false; 1];
@@ -35,7 +37,12 @@ impl Worm {
 
     pub fn advance(&mut self) {
         let did_grow = !get_bool(&af::iszero(&self.grow));
-        let delta = &geom::angle_norm(&self.angle) * 0.1f32;
+        self.brain.mutate(0.01);
+        let choices = self.brain
+            .apply(&Array::new(&[0f32; 128], Dim4::new(&[128, 1, 1, 1])));
+        af::print(&choices);
+        self.angle = af::row(&choices, 0) * 0.01f32 + &self.angle;
+        let delta = &geom::angle_norm(&self.angle) * 0.003f32;
         let next = &af::row(&self.body, 0) + &delta;
         self.body = if did_grow {
             self.grow = &self.grow - 1;
@@ -46,7 +53,16 @@ impl Worm {
         self.body = geom::wrap_pos(&self.body);
     }
 
-    pub fn draw(&self, window: &Window) {
-        window.draw_plot2(&af::col(&self.body, 0), &af::col(&self.body, 1), Some("worm".into()));
+    pub fn get_points(&self) -> Vec<cgmath::Point2<f32>> {
+        use std::iter::repeat;
+        let mut host = Vec::new();
+        host.extend(repeat(0.0).take(self.body.dims().elements() as usize));
+        self.body.host(&mut host);
+        host[0..host.len() / 2]
+            .iter()
+            .cloned()
+            .zip(host[host.len() / 2..].iter().cloned())
+            .map(From::from)
+            .collect()
     }
 }

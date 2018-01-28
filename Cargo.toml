@@ -5,3 +5,7 @@ authors = ["Geordon Worley <vadixidav@gmail.com>"]
 
 [dependencies]
 arrayfire = "3.5.0"
+glowygraph = "0.8.0"
+glium = "0.20.0"
+cgmath = "0.16.0"
+itertools = "0.7.6"
