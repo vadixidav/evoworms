@@ -8,7 +8,7 @@ pub fn distance_squared(a: &Array, b: &Array) -> Array {
 /// Wraps position vectors assuming all dimensions are toroidal from [0, 1).
 pub fn wrap_pos(positions: &Array) -> Array {
     let rems = af::rem(positions, &1.0f32, false);
-    af::select(&(&rems + 1.0), &af::lt(&rems, &0.0f32, false), &rems)
+    af::select(&(&rems + 1.0f32), &af::lt(&rems, &0.0f32, false), &rems)
 }
 
 /// Wraps delta vectors assuming all dimensions are toroidal from [0, 1).

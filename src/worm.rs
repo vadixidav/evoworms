@@ -24,7 +24,7 @@ impl Worm {
         Worm {
             brain: GRU::new_rand(128, 128),
             grow: Array::new(&[0; 1], Dim4::new(&[1, 1, 1, 1])),
-            body: af::randu::<f32>(Dim4::new(&[3, 2, 1, 1])),
+            body: af::randu::<f32>(Dim4::new(&[1, 2, 1, 1])),
             angle: af::randu::<f32>(Dim4::new(&[1, 1, 1, 1])) * 2 * PI,
         }
     }
@@ -35,21 +35,18 @@ impl Worm {
 
     pub fn advance(&mut self) {
         let did_grow = !get_bool(&af::iszero(&self.grow));
-        let delta = &geom::angle_norm(&self.angle) * 0.1;
+        let delta = &geom::angle_norm(&self.angle) * 0.1f32;
         let next = &af::row(&self.body, 0) + &delta;
         self.body = if did_grow {
-            println!("next dims: {:?}, body dims: {:?}", next.dims(), self.body.dims());
-            self.body.eval();
-            next.eval();
             self.grow = &self.grow - 1;
             af::join(0, &next, &self.body)
         } else {
             af::set_row(&af::shift(&self.body, &[1, 0, 0, 0]), &next, 0)
         };
+        self.body = geom::wrap_pos(&self.body);
     }
 
     pub fn draw(&self, window: &Window) {
-        println!("dims: {:?}", self.body.dims());
-        window.draw_plot2(&af::col(&self.body, 0), &af::col(&self.body, 1), None);
+        window.draw_plot2(&af::col(&self.body, 0), &af::col(&self.body, 1), Some("worm".into()));
     }
 }
