@@ -2,20 +2,21 @@ use af;
 use af::{Array, Dim4, MatProp};
 
 /// Creates a random array with the dimensions and elements in the range [-1, 1].
-fn rand_sig(dims: Dim4) -> Array {
+fn rand_sig(dims: Dim4) -> Array<f32> {
     af::randu::<f32>(dims) * 2 - 1
 }
 
 /// Mutates all array elements to random values with probability `lambda`.
-fn mutate_rand(array: &mut Array, lambda: f32) {
-    let choices = af::le(&af::randu::<f32>(array.dims()), &lambda, false);
+fn mutate_rand(array: &mut Array<f32>, lambda: f32) {
+    let choices: Array<bool> =
+        unsafe { ::std::mem::transmute(af::le(&af::randu::<f32>(array.dims()), &lambda, false)) };
     *array = af::select(&rand_sig(array.dims()), &choices, array);
 }
 
 struct GRUTanh {
-    hidden_matrix: Array,
-    input_matrix: Array,
-    biases: Array,
+    hidden_matrix: Array<f32>,
+    input_matrix: Array<f32>,
+    biases: Array<f32>,
 }
 
 impl GRUTanh {
@@ -27,7 +28,7 @@ impl GRUTanh {
         }
     }
 
-    fn apply(&self, hiddens: &Array, inputs: &Array) -> Array {
+    fn apply(&self, hiddens: &Array<f32>, inputs: &Array<f32>) -> Array<f32> {
         af::tanh(
             &(&af::matmul(&self.hidden_matrix, hiddens, MatProp::NONE, MatProp::NONE)
                 + &af::matmul(&self.input_matrix, inputs, MatProp::NONE, MatProp::NONE)
@@ -44,9 +45,9 @@ impl GRUTanh {
 }
 
 struct GRUGate {
-    hidden_matrix: Array,
-    input_matrix: Array,
-    biases: Array,
+    hidden_matrix: Array<f32>,
+    input_matrix: Array<f32>,
+    biases: Array<f32>,
 }
 
 impl GRUGate {
@@ -58,7 +59,7 @@ impl GRUGate {
         }
     }
 
-    fn apply(&self, hiddens: &Array, inputs: &Array) -> Array {
+    fn apply(&self, hiddens: &Array<f32>, inputs: &Array<f32>) -> Array<f32> {
         af::sigmoid(
             &(&af::matmul(&self.hidden_matrix, hiddens, MatProp::NONE, MatProp::NONE)
                 + &af::matmul(&self.input_matrix, inputs, MatProp::NONE, MatProp::NONE)
@@ -78,7 +79,7 @@ pub struct GRU {
     reset_gate: GRUGate,
     update_gate: GRUGate,
     output_layer: GRUTanh,
-    hiddens: Array,
+    hiddens: Array<f32>,
 }
 
 impl GRU {
@@ -91,13 +92,13 @@ impl GRU {
         }
     }
 
-    pub fn apply(&mut self, inputs: &Array) -> Array {
+    pub fn apply(&mut self, inputs: &Array<f32>) -> Array<f32> {
         // Compute reset coefficients.
         let r = self.reset_gate.apply(&self.hiddens, inputs);
         // Compute update coefficients.
         let z = self.update_gate.apply(&self.hiddens, inputs);
 
-        let outputs: Array = (-z.clone() + 1)
+        let outputs: Array<f32> = (-z.clone() + 1)
             * self.output_layer.apply(&(r * &self.hiddens), inputs)
             + z * &self.hiddens;
 

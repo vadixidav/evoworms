@@ -1,11 +1,10 @@
-use gru::GRU;
-use af::{self, Array, Convertable, Dim4, Window};
-use std::f32::consts::PI;
-use geom;
+use af::{self, Array, Convertable, Dim4};
 use cgmath;
-use itertools::Itertools;
+use geom;
+use gru::GRU;
+use std::f32::consts::PI;
 
-fn get_bool(a: &Array) -> bool {
+fn get_bool(a: &Array<bool>) -> bool {
     let mut host = [false; 1];
     a.host(&mut host);
     host[0]
@@ -14,11 +13,11 @@ fn get_bool(a: &Array) -> bool {
 pub struct Worm {
     brain: GRU,
     /// How many times the tail needs to grow before it is caught up.
-    grow: Array,
+    grow: Array<u32>,
     /// Dimension 1 has X values in position 0 and Y values in position 1.
-    body: Array,
+    body: Array<f32>,
     /// An array of just the angle the worm is turned to.
-    angle: Array,
+    angle: Array<f32>,
 }
 
 impl Worm {
@@ -31,14 +30,15 @@ impl Worm {
         }
     }
 
-    pub fn add_growth<C: Convertable>(&mut self, growth: C) {
+    pub fn add_growth(&mut self, growth: u32) {
         self.grow = &self.grow + &growth.convert();
     }
 
     pub fn advance(&mut self) {
         let did_grow = !get_bool(&af::iszero(&self.grow));
         self.brain.mutate(0.01);
-        let choices = self.brain
+        let choices = self
+            .brain
             .apply(&Array::new(&[0f32; 128], Dim4::new(&[128, 1, 1, 1])));
         self.angle = af::row(&choices, 0) * 0.01f32 + &self.angle;
         let delta = &geom::angle_norm(&self.angle) * 0.003f32;

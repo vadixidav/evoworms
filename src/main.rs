@@ -2,15 +2,13 @@ extern crate arrayfire as af;
 extern crate cgmath;
 extern crate glium;
 extern crate glowygraph as gg;
-extern crate itertools;
 
+mod geom;
 mod gru;
 mod worm;
-mod geom;
 
-use glium::glutin;
 use gg::render2::Node;
-use itertools::Itertools;
+use glium::glutin;
 
 fn main() {
     let mut events_loop = glutin::EventsLoop::new();
